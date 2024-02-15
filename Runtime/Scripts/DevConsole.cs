@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -533,9 +534,17 @@ namespace Ignix.Debug.Console
 						}
 
 						var targets = GetTargets(command.sourceType, command.targetType);
-							
-						if(targets.Length == 1)
+
+						if (targets.Length == 0)
+						{
+							UnityEngine.Debug.LogError($"No target of type {command.targetType} was found for command {command.name}");
+							return null;
+						}
+						
+						if (targets.Length == 1)
+						{
 							return command.methodInfo.Invoke(targets[0], parameters);
+						}
 
 						foreach (var target in targets)
 						{
@@ -799,7 +808,7 @@ namespace Ignix.Debug.Console
 
 		public void GoToEndOfLog()
 		{
-			if (scrollRect.gameObject.activeInHierarchy)
+			if (scrollRect != null && scrollRect.gameObject.activeInHierarchy)
 			{
 				StartCoroutine(GoToEndOfLog_Routine());
 			}
@@ -822,7 +831,9 @@ namespace Ignix.Debug.Console
 					break;
 				case TargetType.Single:
 					var single = FindObjectOfType(type);
-					targets = new object[] {single};
+					
+					if(single != null)
+						targets = new object[] {single};
 					break;
 				case TargetType.Registry:
 					if (registry.TryGetValue(type, out var fromRegistry))
@@ -851,13 +862,20 @@ namespace Ignix.Debug.Console
 			}, "Utility");
 		}
 
-		private void RegisterCommandsFromAttribute()
+		private async void RegisterCommandsFromAttribute()
 		{
+			int assemblyCounter = 0;
+			
 			//Search for uses of the attribute
 			var attributeType = typeof(DevCommandAttribute);
 			
 			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
 			{
+				assemblyCounter++;
+				
+				if(assemblyCounter % 50 == 0)
+					await Task.Yield(); //Just a way to spread the processing across multiple frames
+				
 				foreach (var type in assembly.GetTypes())
 				{
 					foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
