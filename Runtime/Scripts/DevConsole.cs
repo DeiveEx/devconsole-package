@@ -64,6 +64,7 @@ namespace Ignix.Debug.Console
 		[Header("Debug")]
 		public bool startOpened;
 		public bool showFunctionInfo;
+		public bool dontDestroyOnLoad = true;
 		[Header("Preferences")]
 		[Tooltip("Allows commands that have no parameters to be called without the need to type the parenthesis.\nEx: \"help\" instead of \"help()\".\n\nNOTE: Only the fist command can take advantage of this, which means nested commands are required to have parenthesis.")]
 		public bool allowQuickCommands = true;
@@ -119,6 +120,9 @@ namespace Ignix.Debug.Console
 				Destroy(gameObject);
 				return;
 			}
+			
+			if(dontDestroyOnLoad)
+				DontDestroyOnLoad(gameObject);
 			
 			myTransform = GetComponent<RectTransform>();
 			scrollRectTransform = scrollRect.GetComponent<RectTransform>();
