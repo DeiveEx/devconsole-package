@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using UnityEngine.InputSystem;
 #endif
 
-namespace Ignix.Debug.Console
+namespace DeiveEx.Debug.Console
 {
 	public enum TargetType
 	{
