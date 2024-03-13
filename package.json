@@ -1,5 +1,5 @@
 {
-    "name": "com.ignix.devconsole",
+    "name": "com.deiveex.devconsole",
     "version": "2.1.0",
     "displayName": "DevConsole",
     "description": "An in-game console that shows Unity Logs and can execute custom commands",
