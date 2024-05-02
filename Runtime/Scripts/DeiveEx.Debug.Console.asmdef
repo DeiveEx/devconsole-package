@@ -1,5 +1,5 @@
 {
-    "name": "Ignix.Debug.Console",
+    "name": "DeiveEx.Debug.Console",
     "rootNamespace": "DeiveEx.Debug.Console",
     "references": [
         "Unity.TextMeshPro",
