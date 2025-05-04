@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DeiveEx.Debug.Console
+namespace DeiveEx.DevConsole
 {
     public class DevCommandAttribute : Attribute
     {

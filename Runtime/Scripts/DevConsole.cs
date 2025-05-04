@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using UnityEngine.InputSystem;
 #endif
 
-namespace DeiveEx.Debug.Console
+namespace DeiveEx.DevConsole
 {
 	public enum TargetType
 	{
@@ -120,7 +120,7 @@ namespace DeiveEx.Debug.Console
 				Destroy(gameObject);
 				return;
 			}
-			
+
 			if(dontDestroyOnLoad)
 				DontDestroyOnLoad(gameObject);
 			
@@ -134,6 +134,14 @@ namespace DeiveEx.Debug.Console
 			consoleAction.performed += context => ShowConsole(!consoleScreen.activeSelf);
 			consoleAction.Enable();
 #endif
+			
+			Application.logMessageReceived += AppendUnityLogLine;
+
+			AppendLogLine("> Welcome to DevConsole! Type \"help\" to see a list of all registered commands.", Color.green);
+
+			//Registering the basic commands
+			RegisterBasicCommands();
+			RegisterCommandsFromAttribute();
 		}
 
 		private void Start()
@@ -141,22 +149,11 @@ namespace DeiveEx.Debug.Console
 			scrollRect.verticalNormalizedPosition = 0;
 			logText.text = "";
 
-			Application.logMessageReceived += AppendUnityLogLine;
-
-			AppendLogLine("> Welcome to DevConsole! Type \"help\" to see a list of all registered commands.", Color.green);
-
-			if (EventSystem.current == null)
-			{
-				UnityEngine.Debug.LogError("No event system found! The console might not work!");
-			}
-
-			//Registering the basic commands
-			RegisterBasicCommands();
-			RegisterCommandsFromAttribute();
-
 			suggestionBox.SetActive(false);
-
 			ShowConsole(startOpened);
+			
+			if (EventSystem.current == null)
+				UnityEngine.Debug.LogError("No event system found! The console might not work!");
 		}
 
 		private void Update()
@@ -424,6 +421,7 @@ namespace DeiveEx.Debug.Console
 
 				inputField.text = autoCompletedText;
 				RebuildSuggestionBox();
+				MoveCaretToEnd();
 			}
 		}
 
@@ -541,7 +539,7 @@ namespace DeiveEx.Debug.Console
 
 						if (targets.Length == 0)
 						{
-							UnityEngine.Debug.LogError($"No target of type {command.targetType} was found for command {command.name}");
+							UnityEngine.Debug.LogError($"No target was found for command {command.name} (Search mode: {command.targetType})");
 							return null;
 						}
 						
@@ -794,10 +792,13 @@ namespace DeiveEx.Debug.Console
 			{
 				inputField.text = commandHistory[selectedHistoryID];
 			}
+			
+			
 		}
 		#endregion
 
 		#region Helper Functions
+		
 		public void ReselectInput()
 		{
 			inputField.Select();
@@ -807,6 +808,12 @@ namespace DeiveEx.Debug.Console
 
 		private void MoveCaretToEnd()
 		{
+			StartCoroutine(WaitAndMoveCaret());
+		}
+
+		private IEnumerator WaitAndMoveCaret()
+		{
+			yield return null;
 			inputField.caretPosition = inputField.text.Length;
 		}
 
